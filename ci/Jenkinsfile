@@ -7,11 +7,28 @@ pipeline {
             steps {
                 echo '=== Jenkins Environment ==='
 
-                sh 'whoami'
-                sh 'pwd'
-                sh 'git --version'
-                sh 'python3 --version'
-                sh 'docker --version'
+                sh '''
+                    set -e
+
+                    echo "User:"
+                    whoami
+
+                    echo ""
+                    echo "Workspace:"
+                    pwd
+
+                    echo ""
+                    echo "Git:"
+                    git --version
+
+                    echo ""
+                    echo "Python:"
+                    python3 --version
+
+                    echo ""
+                    echo "Docker:"
+                    docker --version
+                '''
             }
         }
 
@@ -26,10 +43,60 @@ pipeline {
 
         stage('Verify Workspace') {
             steps {
-                sh 'pwd'
-                sh 'ls -la'
-                sh 'ls -la application'
+                sh '''
+                    set -e
+
+                    echo "===== Infrastructure Repository ====="
+                    pwd
+                    ls -la
+
+                    echo ""
+                    echo "===== Application Repository ====="
+                    ls -la application
+                '''
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                    set -e
+
+                    echo "===== Building Docker Image ====="
+
+                    python3 scripts/build_image.py \
+                        --app-repo application
+                '''
+            }
+        }
+
+        stage('Verify Docker Image') {
+            steps {
+                sh '''
+                    set -e
+
+                    echo "===== Available Docker Images ====="
+
+                    docker images
+                '''
+            }
+        }
+
+    }
+
+    post {
+
+        success {
+            echo 'Pipeline completed successfully.'
+        }
+
+        failure {
+            echo 'Pipeline failed. Check the console output for details.'
+        }
+
+        always {
+            echo 'Pipeline execution finished.'
+        }
+
     }
 }

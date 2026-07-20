@@ -6,24 +6,29 @@ from docker_utils import build_image
 
 
 def main():
+    try:
+        parser = argparse.ArgumentParser()
 
-    parser = argparse.ArgumentParser()
+        parser.add_argument(
+            "--app-repo",
+            help="Path to application repository",
+            default=None,
+        )
 
-    parser.add_argument(
-        "--app-repo",
-        help="Path to application repository",  
-        default=None,
-    )
+        args = parser.parse_args()
 
-    args = parser.parse_args()
+        metadata = load_metadata(args.app_repo)
+        validate_metadata(metadata)
 
-    metadata = load_metadata(args.app_repo)
+        version = generate_version()
 
-    validate_metadata(metadata)
+        build_image(metadata, version, args.app_repo)
 
-    version = generate_version()
+        print("Image build completed successfully.")
 
-    build_image(metadata, version, args.app_repo)
+    except Exception as e:
+        print(f"ERROR: {e}")
+        raise
 
 
 if __name__ == "__main__":

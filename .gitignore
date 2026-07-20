@@ -17,6 +17,7 @@ Thumbs.db
 
 # Python cache
 .pytest_cache/
+*.pyc
 
 # Build artifacts
 dist/
