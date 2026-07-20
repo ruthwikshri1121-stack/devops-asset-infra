@@ -63,11 +63,15 @@ pipeline {
                     sh '''
                         set -e
 
-                        echo "===== Installing Python Dependencies ====="
+                        echo "===== Creating Python Virtual Environment ====="
 
-                        python3 -m pip install --upgrade pip
+                        python3 -m venv .venv
 
-                        python3 -m pip install -r requirements.txt
+                        . .venv/bin/activate
+
+                        python -m pip install --upgrade pip
+
+                        pip install -r requirements.txt
                     '''
                 }
             }
@@ -80,7 +84,9 @@ pipeline {
 
                     echo "===== Running Unit Tests ====="
 
-                    python3 scripts/run_tests.py \
+                    . application/.venv/bin/activate
+
+                    python scripts/run_tests.py \
                         --app-repo application
                 '''
             }
