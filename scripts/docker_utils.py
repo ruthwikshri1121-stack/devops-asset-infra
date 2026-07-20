@@ -1,10 +1,18 @@
 import subprocess
-from pathlib import Path
+
 from registry import load_registry
 from config import get_app_repo
 
 
-def build_image(metadata, version):
+def build_image(metadata, version, app_repo=None):
+    """
+    Build the Docker image.
+
+    Args:
+        metadata (dict): Image metadata loaded from image.json.
+        version (str): Generated image version.
+        app_repo (str | None): Path to the application repository.
+    """
 
     registry = load_registry()
 
@@ -17,7 +25,6 @@ def build_image(metadata, version):
     app_repo = get_app_repo(app_repo)
 
     dockerfile = app_repo / metadata["dockerfile"]
-
     build_context = app_repo / metadata["build_context"]
 
     command = [
@@ -30,10 +37,17 @@ def build_image(metadata, version):
         str(build_context),
     ]
 
-    print("\nExecuting Docker Build\n")
+    print("\n========== Docker Build ==========")
+    print(f"Dockerfile   : {dockerfile}")
+    print(f"Build Context: {build_context}")
+    print(f"Image Tag    : {image_tag}")
+    print()
 
+    print("Executing:")
     print(" ".join(command))
+    print()
 
     subprocess.run(command, check=True)
 
-    print(f"\nImage built successfully: {image_tag}")
+    print("\nDocker image built successfully!")
+    print(f"Image: {image_tag}")
