@@ -57,6 +57,22 @@ pipeline {
             }
         }
 
+        stage('Install Python Dependencies') {
+            steps {
+                dir('application') {
+                    sh '''
+                        set -e
+
+                        echo "===== Installing Python Dependencies ====="
+
+                        python3 -m pip install --upgrade pip
+
+                        python3 -m pip install -r requirements.txt
+                    '''
+                }
+            }
+        }
+
         stage('Run Unit Tests') {
             steps {
                 sh '''
