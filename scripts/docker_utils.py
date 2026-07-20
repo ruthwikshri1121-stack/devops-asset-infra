@@ -16,11 +16,19 @@ def build_image(metadata, version, app_repo=None):
 
     registry = load_registry()
 
-    image_tag = (
-        f"{registry['url']}/"
-        f"{registry['repository']}/"
-        f"{metadata['image_name']}:{version}"
-    )
+    registry_url = registry.get("url", "").strip()
+    repository = registry.get("repository", "").strip()
+
+    image_name = metadata["image_name"]
+
+    if registry_url and repository:
+        image_tag = f"{registry_url}/{repository}/{image_name}:{version}"
+    elif registry_url:
+        image_tag = f"{registry_url}/{image_name}:{version}"
+    elif repository:
+        image_tag = f"{repository}/{image_name}:{version}"
+    else:
+        image_tag = f"{image_name}:{version}"
 
     app_repo = get_app_repo(app_repo)
 
