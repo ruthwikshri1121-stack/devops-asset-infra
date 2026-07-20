@@ -47,11 +47,15 @@ pipeline {
                     set -e
 
                     echo "===== Infrastructure Repository ====="
+
                     pwd
+
                     ls -la
 
                     echo ""
+
                     echo "===== Application Repository ====="
+
                     ls -la application
                 '''
             }
@@ -85,6 +89,8 @@ pipeline {
                     echo "===== Running Unit Tests ====="
 
                     . application/.venv/bin/activate
+
+                    export APP_ENV=testing
 
                     python scripts/run_tests.py \
                         --app-repo application
