@@ -59,3 +59,46 @@ def build_image(metadata, version, app_repo=None):
 
     print("\nDocker image built successfully!")
     print(f"Image: {image_tag}")
+
+
+def push_image(metadata, version):
+    """
+    Push the Docker image to the configured registry.
+    """
+
+    registry = load_registry()
+
+    registry_url = registry.get("url", "").strip()
+    repository = registry.get("repository", "").strip()
+
+    image_name = metadata["image_name"]
+
+    if registry_url and repository:
+        image_tag = f"{registry_url}/{repository}/{image_name}:{version}"
+    elif registry_url:
+        image_tag = f"{registry_url}/{image_name}:{version}"
+    elif repository:
+        image_tag = f"{repository}/{image_name}:{version}"
+    else:
+        raise ValueError(
+            "Registry URL and repository are empty. "
+            "Cannot push image."
+        )
+
+    print("\n========== Docker Push ==========")
+    print(f"Image: {image_tag}")
+    print()
+
+    command = [
+        "docker",
+        "push",
+        image_tag,
+    ]
+
+    print("Executing:")
+    print(" ".join(command))
+    print()
+
+    subprocess.run(command, check=True)
+
+    print("\nDocker image pushed successfully!")
