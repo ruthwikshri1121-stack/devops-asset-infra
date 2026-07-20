@@ -1,0 +1,71 @@
+# ==========================================================
+# DevOps Asset Inventory - Helm Values
+# ==========================================================
+
+replicaCount: 1
+
+image:
+  repository: artifacts.versa-networks.com:18095/versa-docker/ruthwik/devops-asset-inventory
+  tag: "1.6.1"
+  pullPolicy: Always
+
+imagePullSecrets:
+  - name: registry-creds
+
+service:
+  type: NodePort
+  port: 80
+  targetPort: 5000
+  nodePort: 30080
+
+ingress:
+  enabled: true
+  className: nginx
+  host: asset-demo.local
+  path: /
+config:
+  LOG_LEVEL: INFO
+  COMPANY_NAME: Versa Demo
+  APPLICATION_NAME: DevOps Asset Inventory
+
+secret:
+  SECRET_KEY: "versa-demo-secret-key"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+container:
+  port: 5000
+
+probes:
+  readiness:
+    initialDelaySeconds: 10
+    periodSeconds: 5
+
+  liveness:
+    initialDelaySeconds: 20
+    periodSeconds: 10
+
+# ==========================================================
+# PostgreSQL Dependency
+# ==========================================================
+
+postgresql:
+
+  auth:
+    username: versa
+    password: versa123
+    database: assetdb
+
+  primary:
+
+    persistence:
+      enabled: true
+      storageClass: ceph-block
+      size: 2Gi

@@ -1,0 +1,69 @@
+Thank you for installing DevOps Asset Inventory!
+
+=========================================================
+Release Information
+=========================================================
+
+Release Name:
+  {{ .Release.Name }}
+
+Namespace:
+  {{ .Release.Namespace }}
+
+=========================================================
+Check Application Status
+=========================================================
+
+kubectl get all -n {{ .Release.Namespace }}
+
+=========================================================
+Find Node IP
+=========================================================
+
+kubectl get nodes -o wide
+
+=========================================================
+Application Access
+=========================================================
+
+NodePort:
+
+http://<NODE-IP>:{{ .Values.service.nodePort }}
+
+Example:
+
+http://10.195.70.70:{{ .Values.service.nodePort }}
+
+=========================================================
+If using Ingress
+=========================================================
+
+Host:
+
+{{ .Values.ingress.host }}
+
+If DNS or hosts file is configured:
+
+http://{{ .Values.ingress.host }}
+
+=========================================================
+Useful Commands
+=========================================================
+
+View Pods
+
+kubectl get pods -n {{ .Release.Namespace }}
+
+View Services
+
+kubectl get svc -n {{ .Release.Namespace }}
+
+View Ingress
+
+kubectl get ingress -n {{ .Release.Namespace }}
+
+View Logs
+
+kubectl logs deployment/{{ .Chart.Name }} -n {{ .Release.Namespace }}
+
+=========================================================

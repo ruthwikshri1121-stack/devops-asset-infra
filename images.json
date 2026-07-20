@@ -1,0 +1,17 @@
+{
+    "registry": {
+        "url": "",
+        "repository": ""
+    },
+
+    "applications": {
+        "devops-asset-inventory": {
+            "image": "",
+            "version": "",
+            "commit": "",
+            "build": "",
+            "timestamp": "",
+            "status": ""
+        }
+    }
+}

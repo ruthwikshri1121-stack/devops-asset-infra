@@ -1,0 +1,16 @@
+apiVersion: v2
+
+name: devops-asset-inventory
+
+description: Helm chart for DevOps Asset Inventory application
+
+type: application
+
+version: 1.1.0
+
+appVersion: "1.1.0"
+
+dependencies:
+  - name: postgresql
+    version: "18.7.13"
+    repository: "https://charts.bitnami.com/bitnami"
