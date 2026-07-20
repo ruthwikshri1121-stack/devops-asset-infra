@@ -1,0 +1,35 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Verify Environment') {
+            steps {
+                echo '=== Jenkins Environment ==='
+
+                sh 'whoami'
+                sh 'pwd'
+                sh 'git --version'
+                sh 'python3 --version'
+                sh 'docker --version'
+            }
+        }
+
+        stage('Checkout Application') {
+            steps {
+                dir('application') {
+                    git branch: 'main',
+                        url: 'https://github.com/ruthwikshri1121-stack/devops-asset-inventory.git'
+                }
+            }
+        }
+
+        stage('Verify Workspace') {
+            steps {
+                sh 'pwd'
+                sh 'ls -la'
+                sh 'ls -la application'
+            }
+        }
+    }
+}
