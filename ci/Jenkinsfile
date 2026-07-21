@@ -152,7 +152,7 @@ pipeline {
 
                     python scripts/build_image.py \
                         --app-repo application \
-                        --version ${env.IMAGE_VERSION}
+                        --version ${IMAGE_VERSION}
                 """
             }
         }
