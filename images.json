@@ -6,10 +6,10 @@
     "applications": {
         "devops-asset-inventory": {
             "image": "devops-asset-inventory",
-            "version": "1.0.3",
+            "version": "1.0.4",
             "commit": "575d5ad",
-            "build": "27",
-            "timestamp": "2026-07-21T08:52:16Z",
+            "build": "28",
+            "timestamp": "2026-07-21T10:28:06Z",
             "status": "SUCCESS"
         }
     }
