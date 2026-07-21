@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    environment {
+        APP_ENV = "testing"
+        APP_NAME = "devops-asset-inventory"
+        IMAGE_VERSION = ""
+    }
+
     stages {
 
         stage('Verify Environment') {
@@ -10,22 +16,28 @@ pipeline {
                 sh '''
                     set -e
 
+                    echo "===== Environment ====="
+
                     echo "User:"
                     whoami
 
                     echo ""
+
                     echo "Workspace:"
                     pwd
 
                     echo ""
+
                     echo "Git:"
                     git --version
 
                     echo ""
+
                     echo "Python:"
                     python3 --version
 
                     echo ""
+
                     echo "Docker:"
                     docker --version
                 '''
@@ -35,8 +47,10 @@ pipeline {
         stage('Checkout Application') {
             steps {
                 dir('application') {
-                    git branch: 'main',
+                    git(
+                        branch: 'main',
                         url: 'https://github.com/ruthwikshri1121-stack/devops-asset-inventory.git'
+                    )
                 }
             }
         }
@@ -49,7 +63,6 @@ pipeline {
                     echo "===== Infrastructure Repository ====="
 
                     pwd
-
                     ls -la
 
                     echo ""
@@ -81,6 +94,26 @@ pipeline {
             }
         }
 
+        stage('Generate Version') {
+            steps {
+                script {
+
+                    env.IMAGE_VERSION = sh(
+                        script: '''
+                            . application/.venv/bin/activate
+
+                            python scripts/version.py \
+                                --images images.json \
+                                --application devops-asset-inventory
+                        ''',
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Generated Image Version: ${env.IMAGE_VERSION}"
+                }
+            }
+        }
+
         stage('Run Unit Tests') {
             steps {
                 sh '''
@@ -105,8 +138,11 @@ pipeline {
 
                     echo "===== Building Docker Image ====="
 
-                    python3 scripts/build_image.py \
-                        --app-repo application
+                    . application/.venv/bin/activate
+
+                    python scripts/build_image.py \
+                        --app-repo application \
+                        --version ${IMAGE_VERSION}
                 '''
             }
         }
@@ -123,21 +159,66 @@ pipeline {
             }
         }
 
+        stage('Update Build Metadata') {
+            steps {
+                sh '''
+                    set -e
+
+                    echo "===== Updating images.json ====="
+
+                    . application/.venv/bin/activate
+
+                    python scripts/update_images.py \
+                        --images images.json \
+                        --application ${APP_NAME} \
+                        --version ${IMAGE_VERSION} \
+                        --build-number ${BUILD_NUMBER}
+                '''
+            }
+        }
+
+        stage('Push Docker Image') {
+            when {
+                expression {
+                    return fileExists('images.json')
+                }
+            }
+
+            steps {
+                sh '''
+                    set -e
+
+                    echo "===== Pushing Docker Image ====="
+
+                    . application/.venv/bin/activate
+
+                    python scripts/push_image.py \
+                        --app-repo application \
+                        --version ${IMAGE_VERSION}
+                '''
+            }
+        }
     }
 
     post {
 
         success {
+            echo '========================================'
             echo 'Pipeline completed successfully.'
+            echo "Application : ${APP_NAME}"
+            echo "Version     : ${IMAGE_VERSION}"
+            echo '========================================'
         }
 
         failure {
-            echo 'Pipeline failed. Check the console output for details.'
+            echo '========================================'
+            echo 'Pipeline failed.'
+            echo 'Check the Jenkins console output.'
+            echo '========================================'
         }
 
         always {
             echo 'Pipeline execution finished.'
         }
-
     }
 }
