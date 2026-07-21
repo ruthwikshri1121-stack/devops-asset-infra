@@ -1,3 +1,4 @@
+def imageVersion = ""
 pipeline {
     agent any
 
@@ -117,9 +118,8 @@ pipeline {
                         error("Version generation failed. No version was returned.")
                     }
 
-                    env.IMAGE_VERSION = version
-
-                    echo "Generated Image Version: ${env.IMAGE_VERSION}"
+                    imageVersion = version
+                    echo "Generated Image Version: ${imageVersion}"
                 }
             }
         }
