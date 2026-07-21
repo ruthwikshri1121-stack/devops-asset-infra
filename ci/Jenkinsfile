@@ -232,6 +232,50 @@ pipeline {
                 }
             }
         }
+        stage('Commit Build Metadata') {
+
+            when {
+                expression {
+                    return fileExists('images.json')
+                }
+            }
+
+            steps {
+
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'github-pat',
+                        usernameVariable: 'GIT_USER',
+                        passwordVariable: 'GIT_TOKEN'
+                    )
+                ])  {
+
+                    sh """
+                        set -e
+
+                        echo "===== Committing Build Metadata ====="
+
+                        git config user.name "Jenkins CI"
+                        git config user.email "jenkins@versa-demo.local"
+
+                        git status
+
+                        git add images.json
+
+                        if git diff --cached --quiet; then
+                            echo "No metadata changes to commit."
+                            exit 0
+                        fi
+
+                        git commit -m "ci: update devops-asset-inventory to ${imageVersion}"
+
+                        git remote set-url origin https://\$GIT_USER:\$GIT_TOKEN@github.com/ruthwikshri1121-stack/devops-asset-infra.git
+
+                        git push origin HEAD:main
+                    """
+                }
+            }
+        }
     }
 
     post {
