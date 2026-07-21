@@ -1,7 +1,7 @@
 {
     "registry": {
-        "url": "",
-        "repository": ""
+        "url": "artifacts.versa-networks.com:18095",
+        "repository": "versa-docker/ruthwik"
     },
 
     "applications": {

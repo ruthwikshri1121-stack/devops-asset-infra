@@ -1,11 +1,11 @@
 def imageVersion = ""
+
 pipeline {
     agent any
 
     environment {
         APP_ENV = "testing"
         APP_NAME = "devops-asset-inventory"
-        IMAGE_VERSION = ""
     }
 
     stages {
@@ -119,6 +119,8 @@ pipeline {
                     }
 
                     imageVersion = version
+                    env.IMAGE_VERSION = version
+
                     echo "Generated Image Version: ${imageVersion}"
                 }
             }
@@ -152,7 +154,7 @@ pipeline {
 
                     python scripts/build_image.py \
                         --app-repo application \
-                        --version ${IMAGE_VERSION}
+                        --version ${imageVersion}
                 """
             }
         }
@@ -181,13 +183,14 @@ pipeline {
                     python scripts/update_images.py \
                         --images images.json \
                         --application ${env.APP_NAME} \
-                        --version ${env.IMAGE_VERSION} \
+                        --version ${imageVersion} \
                         --build-number ${env.BUILD_NUMBER}
                 """
             }
         }
 
         stage('Push Docker Image') {
+
             when {
                 expression {
                     return fileExists('images.json')
@@ -195,17 +198,38 @@ pipeline {
             }
 
             steps {
-                sh """
-                    set -e
 
-                    echo "===== Pushing Docker Image ====="
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'versa-artifactory',
+                        usernameVariable: 'ART_USER',
+                        passwordVariable: 'ART_PASS'
+                    )
+                ]) {
 
-                    . application/.venv/bin/activate
+                    sh """
+                        set -e
 
-                    python scripts/push_image.py \
-                        --app-repo application \
-                        --version ${env.IMAGE_VERSION}
-                """
+                        echo "===== Docker Login ====="
+
+                        echo "\$ART_PASS" | docker login \
+                            artifacts.versa-networks.com:18095 \
+                            --username "\$ART_USER" \
+                            --password-stdin
+
+                        echo ""
+
+                        echo "===== Pushing Docker Image ====="
+
+                        . application/.venv/bin/activate
+
+                        python scripts/push_image.py \
+                            --app-repo application \
+                            --version ${imageVersion}
+
+                        docker logout artifacts.versa-networks.com:18095
+                    """
+                }
             }
         }
     }
@@ -216,7 +240,7 @@ pipeline {
             echo '========================================'
             echo 'Pipeline completed successfully.'
             echo "Application : ${env.APP_NAME}"
-            echo "Version     : ${env.IMAGE_VERSION}"
+            echo "Version     : ${imageVersion}"
             echo '========================================'
         }
 
