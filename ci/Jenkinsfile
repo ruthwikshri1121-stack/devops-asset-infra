@@ -255,27 +255,19 @@ pipeline {
 
                         echo "===== Committing Build Metadata ====="
 
-                        git config user.name "Jenkins CI"
-                        git config user.email "jenkins@versa-demo.local"
+                        . application/.venv/bin/activate
 
-                        git status
-
-                        git add images.json
-
-                        if git diff --cached --quiet; then
-                            echo "No metadata changes to commit."
-                            exit 0
-                        fi
-
-                        git commit -m "ci: update devops-asset-inventory to ${imageVersion}"
-
-                        git remote set-url origin https://\$GIT_USER:\$GIT_TOKEN@github.com/ruthwikshri1121-stack/devops-asset-infra.git
-
-                        git push origin HEAD:main
+                        python scripts/git_utils.py \
+                            --images images.json \
+                            --version ${imageVersion} \
+                            --username "Jenkins CI" \
+                            --email "jenkins@versa-demo.local" \
+                            --token "\$GIT_TOKEN" \
+                            --repository "ruthwikshri1121-stack/devops-asset-infra"
                     """
+                    }
                 }
             }
-        }
     }
 
     post {
