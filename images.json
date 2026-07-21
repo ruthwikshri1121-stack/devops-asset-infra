@@ -3,15 +3,14 @@
         "url": "artifacts.versa-networks.com:18095",
         "repository": "versa-docker/ruthwik"
     },
-
     "applications": {
         "devops-asset-inventory": {
-            "image": "",
-            "version": "",
-            "commit": "",
-            "build": "",
-            "timestamp": "",
-            "status": ""
+            "image": "devops-asset-inventory",
+            "version": "1.0.1",
+            "commit": "575d5ad",
+            "build": "25",
+            "timestamp": "2026-07-21T08:19:07Z",
+            "status": "SUCCESS"
         }
     }
 }
