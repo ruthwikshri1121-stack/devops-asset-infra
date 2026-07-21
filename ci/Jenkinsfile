@@ -99,15 +99,15 @@ pipeline {
                 script {
 
                     def version = sh(
-                        script: '''
+                        script: """
                             set -e
 
                             . application/.venv/bin/activate
 
                             python scripts/version.py \
                                 --images images.json \
-                                --application ${APP_NAME}
-                        ''',
+                                --application ${env.APP_NAME}
+                        """,
                         returnStdout: true
                     ).trim()
 
@@ -126,24 +126,24 @@ pipeline {
 
         stage('Run Unit Tests') {
             steps {
-                sh '''
+                sh """
                     set -e
 
                     echo "===== Running Unit Tests ====="
 
                     . application/.venv/bin/activate
 
-                    export APP_ENV=${APP_ENV}
+                    export APP_ENV=${env.APP_ENV}
 
                     python scripts/run_tests.py \
                         --app-repo application
-                '''
+                """
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh '''
+                sh """
                     set -e
 
                     echo "===== Building Docker Image ====="
@@ -152,8 +152,8 @@ pipeline {
 
                     python scripts/build_image.py \
                         --app-repo application \
-                        --version ${IMAGE_VERSION}
-                '''
+                        --version ${env.IMAGE_VERSION}
+                """
             }
         }
 
@@ -171,7 +171,7 @@ pipeline {
 
         stage('Update Build Metadata') {
             steps {
-                sh '''
+                sh """
                     set -e
 
                     echo "===== Updating images.json ====="
@@ -180,10 +180,10 @@ pipeline {
 
                     python scripts/update_images.py \
                         --images images.json \
-                        --application ${APP_NAME} \
-                        --version ${IMAGE_VERSION} \
-                        --build-number ${BUILD_NUMBER}
-                '''
+                        --application ${env.APP_NAME} \
+                        --version ${env.IMAGE_VERSION} \
+                        --build-number ${env.BUILD_NUMBER}
+                """
             }
         }
 
@@ -195,7 +195,7 @@ pipeline {
             }
 
             steps {
-                sh '''
+                sh """
                     set -e
 
                     echo "===== Pushing Docker Image ====="
@@ -204,8 +204,8 @@ pipeline {
 
                     python scripts/push_image.py \
                         --app-repo application \
-                        --version ${IMAGE_VERSION}
-                '''
+                        --version ${env.IMAGE_VERSION}
+                """
             }
         }
     }
@@ -215,8 +215,8 @@ pipeline {
         success {
             echo '========================================'
             echo 'Pipeline completed successfully.'
-            echo "Application : ${APP_NAME}"
-            echo "Version     : ${IMAGE_VERSION}"
+            echo "Application : ${env.APP_NAME}"
+            echo "Version     : ${env.IMAGE_VERSION}"
             echo '========================================'
         }
 
