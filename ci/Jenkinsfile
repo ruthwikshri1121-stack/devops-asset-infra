@@ -102,7 +102,7 @@ pipeline {
                         script: '''
                             set -e
 
-                            application/.venv/bin/activate
+                            . application/.venv/bin/activate
 
                             python scripts/version.py \
                                 --images images.json \
@@ -133,7 +133,7 @@ pipeline {
 
                     . application/.venv/bin/activate
 
-                    export APP_ENV=testing
+                    export APP_ENV=${APP_ENV}
 
                     python scripts/run_tests.py \
                         --app-repo application
