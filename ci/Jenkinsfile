@@ -1,5 +1,5 @@
 def imageVersion = ""
-def chartVersion = imageVersion
+def chartVersion = ""
 
 pipeline {
     agent any
@@ -121,8 +121,10 @@ pipeline {
 
                     imageVersion = version
                     env.IMAGE_VERSION = version
-
                     echo "Generated Image Version: ${imageVersion}"
+
+                    chartVersion = imageVersion
+                    env.CHART_VERSION = chartVersion
                 }
             }
         }
