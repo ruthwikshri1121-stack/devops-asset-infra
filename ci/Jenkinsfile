@@ -1,4 +1,5 @@
 def imageVersion = ""
+def chartVersion = imageVersion
 
 pipeline {
     agent any
@@ -266,6 +267,63 @@ pipeline {
                             --repository "ruthwikshri1121-stack/devops-asset-infra"
                     """
                     }
+                }
+            }
+
+            stage('Package Helm Chart') {
+                steps {
+                    sh """
+                    . application/.venv/bin/activate
+
+                    python scripts/helm_package.py \
+                        --chart-dir helm/devops-asset-inventory \
+                        --chart-version ${chartVersion} \
+                        --app-version ${imageVersion} \
+                        --output-dir dist
+                    """
+                }
+            }
+
+            stage('Push Helm Chart') {
+                steps {
+
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'versa-artifactory',
+                            usernameVariable: 'ART_USER',
+                            passwordVariable: 'ART_PASS'
+                        )
+                    ]) {
+
+                        sh """
+                        . application/.venv/bin/activate
+
+                        python scripts/helm_push.py \
+                            --chart dist/devops-asset-inventory-${chartVersion}.tgz \
+                            --repo-url https://artifacts.versa-networks.com/repository/versa-helm/ruthwik/ \
+                            --username $ART_USER \
+                            --password $ART_PASS
+                        """
+                    }
+
+                }
+            }
+
+            stage('Deploy Helm Chart') {
+
+                steps {
+
+                    sh """
+                    . application/.venv/bin/activate
+
+                    python scripts/helm_deploy.py \
+                        --release asset-demo \
+                        --namespace ruthwik \
+                        --repo versa-helm \
+                        --chart devops-asset-inventory \
+                        --chart-version ${chartVersion} \
+                        --image-tag ${imageVersion}
+                    """
                 }
             }
     }
