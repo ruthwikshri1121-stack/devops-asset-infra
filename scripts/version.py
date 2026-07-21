@@ -3,8 +3,8 @@
 """
 Version management utility.
 
-Reads images.json, increments semantic version,
-updates the file and returns the new version.
+Reads images.json and generates the next semantic version.
+This script DOES NOT modify images.json.
 """
 
 import argparse
@@ -13,6 +13,9 @@ from pathlib import Path
 
 
 class VersionManager:
+    """
+    Handles semantic version generation.
+    """
 
     def __init__(self, images_file: Path):
 
@@ -30,19 +33,22 @@ class VersionManager:
 
         return version
 
-    def increment_patch(self, version):
+    @staticmethod
+    def increment_patch(version):
 
         major, minor, patch = version.split(".")
 
         return f"{major}.{minor}.{int(patch) + 1}"
 
-    def increment_minor(self, version):
+    @staticmethod
+    def increment_minor(version):
 
         major, minor, _ = version.split(".")
 
         return f"{major}.{int(minor) + 1}.0"
 
-    def increment_major(self, version):
+    @staticmethod
+    def increment_major(version):
 
         major, _, _ = version.split(".")
 
@@ -63,7 +69,10 @@ class VersionManager:
 
 def generate_version(images_file, application, level="patch"):
     """
-    Generate the next semantic version without updating images.json.
+    Generate the next semantic version.
+
+    Returns:
+        str: Generated semantic version.
     """
 
     manager = VersionManager(images_file)
@@ -74,7 +83,7 @@ def generate_version(images_file, application, level="patch"):
 def main():
 
     parser = argparse.ArgumentParser(
-        description="Generate semantic image version"
+        description="Generate the next semantic image version."
     )
 
     parser.add_argument(
@@ -93,12 +102,7 @@ def main():
         "--level",
         default="patch",
         choices=["patch", "minor", "major"],
-    )
-
-    parser.add_argument(
-        "--update",
-        action="store_true",
-        help="Persist the generated version into images.json",
+        help="Version increment level",
     )
 
     args = parser.parse_args()
@@ -108,13 +112,6 @@ def main():
         application=args.application,
         level=args.level,
     )
-
-    if args.update:
-        save_version(
-            images_file=Path(args.images),
-            application=args.application,
-            version=version,
-        )
 
     print(version)
 

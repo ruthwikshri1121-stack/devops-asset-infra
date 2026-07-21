@@ -98,16 +98,26 @@ pipeline {
             steps {
                 script {
 
-                    env.IMAGE_VERSION = sh(
+                    def version = sh(
                         script: '''
-                            . application/.venv/bin/activate
+                            set -e
+
+                            application/.venv/bin/activate
 
                             python scripts/version.py \
                                 --images images.json \
-                                --application devops-asset-inventory
+                                --application ${APP_NAME}
                         ''',
                         returnStdout: true
                     ).trim()
+
+                    echo "Raw version output: '${version}'"
+
+                    if (!version) {
+                        error("Version generation failed. No version was returned.")
+                    }
+
+                    env.IMAGE_VERSION = version
 
                     echo "Generated Image Version: ${env.IMAGE_VERSION}"
                 }
